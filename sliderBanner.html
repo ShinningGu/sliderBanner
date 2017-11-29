@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>轮播图滑动</title>
+</head>
+<style type="text/css">
+* {
+    margin: 0;
+    padding: 0;
+}
+
+ul,
+li,
+img {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    list-style-type: none;
+}
+
+#list {
+    height: 250px;
+    list-style-type: none;
+    overflow: hidden;
+}
+
+#luanpo {
+    max-width: 600px;
+    height: 300px;
+    border: 1px solid #CCC;
+    margin: 50px auto;
+    position: relative;
+    overflow: hidden;
+}
+
+#imgs li {
+    float: left;
+    height: 300px;
+    width: 600px;
+    transition: all 0.5s;
+}
+
+#imgs {
+    height: 300px;
+    position: absolute;
+}
+
+.a {
+    background: yellow;
+    opacity: 0.5;
+}
+
+.b {
+    background: #ccc;
+    opacity: 0.5;
+}
+
+img {
+    width: 100%;
+    height: 100%;
+}
+
+#num {
+    overflow: auto;
+    position: absolute;
+    right: 200px;
+    bottom: 0;
+}
+
+#num li {
+    float: left;
+    height: 30px;
+    width: 30px;
+    border-radius: 15px;
+    text-align: center;
+    line-height: 30px;
+    border: 1px solid #CCC;
+    margin-left: 10px;
+    cursor: pointer;
+    z-index: 2222;
+}
+#luanpo:hover #pre ,#luanpo:hover #next
+{
+display: block;
+}
+
+#pre,#next{
+    position: absolute;
+    top: 50%;
+    margin-top: -25px;
+    display: none;
+    height: 50px;
+    width: 50px;
+    text-align: center;
+    line-height: 50px;
+    cursor: pointer;
+    border-radius: 50%;
+    font-weight: 800;
+}
+#pre:hover,#next:hover{
+    background: rgba(171,222,251,.5);
+}
+#pre{
+    left: 10px;
+}
+#next{
+    right: 10px;
+}
+</style>
+
+<body>
+    <span></span>
+    <div id="luanpo">
+        <ul id="imgs" style="left:0;">
+            <li><img src="1.jpg" /></li>
+            <li><img src="2.jpg" /></li>
+            <li><img src="3.jpg" /></li>
+            <li><img src="4.jpg" /></li>
+            <li><img src="5.jpg" /></li>
+        </ul>
+        <ul id="num">
+            <li class="a">1</li>
+            <li class="b">2</li>
+            <li class="b">3</li>
+            <li class="b">4</li>
+            <li class="b">5</li>
+        </ul>
+        <span id="pre"><</span>
+        <span id="next">></span>
+    </div>
+    <script type="text/javascript">
+        window.onload = function(){
+        //获取元素
+    var imgs = document.getElementById('imgs').getElementsByTagName('li');
+    var nums = document.getElementById("num").getElementsByTagName("li");
+    var luanpo = document.getElementById("luanpo");
+    var oimg = document.getElementById('imgs');
+    var pre = document.getElementById("pre"),
+    next = document.getElementById("next");
+    // 申明当前页面的index，并初始化为0；
+    var iNow = 0;
+    var dt = null;
+    //先设置一个ul宽度；
+    oimg.style.width = imgs.length * imgs[0].offsetWidth + "px";
+    function tab() {
+
+        for (var i = 0; i < nums.length; i++) {
+            nums[i].index = i;
+            nums[i].onclick = function() {           	
+                // clearInterval(dt);
+                // var tempL = parseInt(oimg.style.left);
+                // 将现在的index保存下来
+                iNow = this.index;
+                //强制将所有的额小圆点的classname转换为b
+                for (var i = 0; i < nums.length; i++) {
+                    nums[i].className = "b";
+                }
+                // 设置当前的样式
+                this.className = "a";
+                // 将图片移动到特定的位置
+                oimg.style.left = -(imgs[0].offsetWidth * iNow) + "px"; 
+                //这边可以加上我前面所写的那个缓动框架            
+            }
+            
+        }
+    }
+    // 移动的哪一页的代码
+  var  move = function(offset){
+  	// console.log(iNow);
+        for (var k = 0; k < nums.length; k++) {
+        	//给相应的小点classname值
+            if (iNow == nums[k].index) { 
+            	nums[k].className = 'a'; 
+	        } else {
+	         	nums[k].className = 'b'; 
+	     	}
+        }
+         var newLeft = parseInt(oimg.style.left) + offset;       // 移动的终点值
+            var time = 600;                             // 位移总时长；
+            var interval = 10;                          // 位移间隔时间
+            var speed = offset/(time/interval);         // 每次位移的距离；
+
+            go();
+            function go(){
+                var left = parseInt(oimg.style.left);       // 当前图片容器的左边定位距离
+                tempLeft = left+speed; 
+                oimg.style.left = tempLeft+'px';
+
+                if((speed < 0 && tempLeft > newLeft ) || (speed > 0 && tempLeft < newLeft )){
+                    setTimeout(function(){
+                        go();               // 自己调用自己，叫做自调函数
+                    },interval);
+                }else{
+                    // 图片移动的最终状态应该回归终点
+                    oimg.style.left = newLeft+'px';
+                }
+            }
+    }
+    // 鼠标移动到最大的盒子是停止自动轮播并移动出去后又开始轮播
+    luanpo.onmouseleave = function() {
+                start();
+            }
+    luanpo.onmouseenter = function() {
+                clearInterval(dt);
+            }
+            //自动轮播的代码
+   var nextG= function(){
+    	// console.log(oimg.style.left);
+        if (iNow >nums.length - 2) {
+            iNow = 0;
+        } else {
+            iNow++;
+        }
+       var left = parseInt(oimg.style.left);
+            var offset = (left <= -2400)? 2400: -600;
+            move(offset);
+    }
+    // 前一页代码
+    function preG(){
+    	// console.log(iNow);
+         if (iNow < 1) {
+         //如果当前页面的index值小于1后就是已经移动到了第一张直接将图片直接拉到最后一张
+                iNow = nums.length-1;
+            } else {
+                //否则直接将index值减小
+                iNow--;
+            }
+            //取得当前的left值
+            var left = parseInt(oimg.style.left);
+            var offset = (left >=0)? -2400: 600;
+            move(offset);
+    }
+    //自动轮播开始
+    function start() {　　
+        clearInterval(dt);
+        // 申明一个计时器        
+        dt = setInterval(function() {
+            nextG()           
+        }, 2000);
+        tab();//要调用tab换下标的函数
+    }
+    //调用轮播的函数
+    start();
+    // 点击前一页的事件
+    pre.onclick = debounce(preG,700,true)           
+    // 点击后一页的事件
+    next.onclick = debounce(nextG,700,true)
+   
+    function debounce(func, wait, immediate) {//防止多次点击后图片发生移位
+
+    var timeout, result;
+    return function () {
+        var context = this;
+        //将this保存下来，以为在定时器里里面
+        var args = arguments;
+
+        if (timeout) clearTimeout(timeout);
+        if (immediate) {
+            // 如果已经执行过，不再执行
+            var callNow = !timeout;
+            timeout = setTimeout(function(){
+                timeout = null;
+            }, wait)
+            if (callNow) result = func.apply(context, args)
+        }
+        else {
+            timeout = setTimeout(function(){
+                func.apply(context, args)
+            }, wait);
+        }
+        return result;
+    }
+}
+    }
+
+    </script>
+</body>
+
+</html>
